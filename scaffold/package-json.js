@@ -25,10 +25,12 @@ function basePackage({contract, frontend, projectName, supportsSandbox}) {
       ...unitTestScripts(contract),
       ...integrationTestScripts(supportsSandbox),
     },
+    'dependencies': {
+      ...contractDependencies(contract),
+    },
     'devDependencies': {
       'near-cli': '^3.3.0',
       'nodemon': '~2.0.16',
-      ...contractDevDependencies(contract),
       ...workspaceDevDependencies(supportsSandbox),
       ...frontendDevDependencies(hasFrontend),
     },
@@ -45,24 +47,28 @@ const startScript = hasFrontend => hasFrontend ? {
 const buildScript = hasFrontend => hasFrontend ? {
   'build': 'npm run build:contract && npm run build:web',
   'build:web': 'parcel build frontend/index.html --public-url ./',
+  'build:contract': 'npm run build:contract:compile && npm run build:contract:cpwasm',
 } : {
   'build': 'npm run build:contract',
+  'build:contract': 'npm run build:contract:compile && npm run build:contract:cpwasm',
 };
 
 const buildContractScript = contract => {
   switch (contract) {
     case 'js':
+      return {
+        'build:contract:compile': 'cd contract && npm i && npm run build',
+        'build:contract:cpwasm': 'mkdir -p out && cp contract/build/contract.wasm ./out/hello_near.wasm'
+      };
     case 'assemblyscript':
       return {
-        'build:contract': 'npm run build:asb && npm run build:cpwasm',
-        'build:asb': 'cd contract && npm run build',
-        'build:cpwasm': 'mkdir -p out && cp contract/build/release/hello_near.wasm ./out/hello_near.wasm'
+        'build:contract:compile': 'cd contract && npm run build',
+        'build:contract:cpwasm': 'mkdir -p out && cp contract/build/release/hello_near.wasm ./out/hello_near.wasm'
       };
     case 'rust':
       return {
-        "build:contract": "npm run build:rustup && npm run build:cpwasm",
-        "build:rustup": "cd contract && rustup target add wasm32-unknown-unknown && cargo build --all --target wasm32-unknown-unknown --release",
-        "build:cpwasm": "mkdir -p out && cp ./contract/target/wasm32-unknown-unknown/release/hello_near.wasm ./out/hello_near.wasm",  
+        "build:contract:compile": "cd contract && rustup target add wasm32-unknown-unknown && cargo build --all --target wasm32-unknown-unknown --release",
+        "build:contract:cpwasm": "mkdir -p out && cp contract/target/wasm32-unknown-unknown/release/hello_near.wasm ./out/hello_near.wasm",  
       };
     default:
       return {};
@@ -72,7 +78,7 @@ const buildContractScript = contract => {
 const deployScript = (contract) => {
   switch (contract) {
     case 'js': return {
-      'deploy': 'cd contract && npm run deploy',
+      'deploy': 'npm run build:contract && near dev-deploy --wasmFile ./out/hello_near.wasm && export $(cat ./neardev/dev-account.env) && near call $CONTRACT_NAME init --accountId $CONTRACT_NAME --deposit 1',
     };
     case 'assemblyscript':
     case 'rust':
@@ -111,7 +117,7 @@ const integrationTestScripts = (supportsSandbox) => {
   }
 };
 
-const contractDevDependencies = contract => {
+const contractDependencies = contract => {
   switch(contract){
     case "assemblyscript":
       return {"near-sdk-as": "^3.2.3"}
