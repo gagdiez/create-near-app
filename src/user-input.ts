@@ -1,4 +1,6 @@
 import {
+  Example,
+  EXAMPLES,
   Contract,
   CONTRACTS,
   Frontend,
@@ -19,6 +21,7 @@ import fs from 'fs';
 export async function getUserArgs(): Promise<UserConfig> {
   program
     .argument('[projectName]')
+    .option('--examples <examples>')
     .option('--contract <contract>')
     .option('--frontend <frontend>')
     .option('--tests <tests>')
@@ -29,21 +32,22 @@ export async function getUserArgs(): Promise<UserConfig> {
 
   const options = program.opts();
   const [projectName] = program.args;
-  const {contract, frontend, tests, install} = options;
-  return {contract, frontend, projectName, tests, install};
+  const {example, contract, frontend, tests, install} = options;
+  return {example, contract, frontend, projectName, tests, install};
 }
 
 export function validateUserArgs(args: UserConfig): 'error' | 'ok' | 'none' {
   if (args === null) {
     return 'error';
   }
-  const {projectName, contract, frontend, tests} = args;
-  const hasAllOptions = contract !== undefined && frontend !== undefined;
+  const {projectName, example, contract, frontend, tests} = args;
+  const hasAllOptions = example !== undefined && contract !== undefined && frontend !== undefined;
   const hasPartialOptions = contract !== undefined || frontend !== undefined;
   const hasProjectName = projectName !== undefined;
   const hasAllArgs = hasAllOptions && hasProjectName;
   const hasNoArgs = !hasPartialOptions && !hasProjectName;
   const optionsAreValid = hasAllOptions
+    && EXAMPLES.includes(example)
     && FRONTENDS.includes(frontend)
     && CONTRACTS.includes(contract)
     && TESTING_FRAMEWORKS.includes(tests);
@@ -58,6 +62,13 @@ export function validateUserArgs(args: UserConfig): 'error' | 'ok' | 'none' {
 }
 
 type Choices<T> = {title: string, value: T}[];
+const exampleChoices: Choices<Example> = [
+  {title: 'Hello NEAR', value: 'hello_near'},
+  {title: 'Count on NEAR', value: 'count_near'},
+  {title: 'Guest Book', value: 'guest-book'},
+  {title: 'Donation', value: 'donation'},
+  {title: 'Cross-Contract Call', value: 'xcc'},
+];
 const contractChoices: Choices<Contract> = [
   {title: 'TypeScript', value: 'js'},
   {title: 'Rust', value: 'rust'},
@@ -73,6 +84,12 @@ const frontendChoices: Choices<Frontend> = [
   {title: 'No frontend', value: 'none'},
 ];
 const userPrompts: PromptObject[] = [
+  {
+    type: 'select',
+    name: 'example',
+    message: 'Which example do you want to create',
+    choices: exampleChoices,
+  },
   {
     type: 'select',
     name: 'contract',

@@ -11,6 +11,7 @@ import * as show from './messages';
   const {
     config: {
       projectName,
+      example,
       contract,
       frontend,
       tests,
@@ -24,12 +25,13 @@ import * as show from './messages';
   let createSuccess;
   try {
     createSuccess = await createProject({
+      example,
       contract,
       frontend,
       tests,
       projectName,
       verbose: false,
-      rootDir: path.resolve(__dirname, '../templates'),
+      rootDir: path.resolve(__dirname, `../templates/${example}`),
       projectPath,
     });
   } catch (e) {

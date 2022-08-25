@@ -6,12 +6,12 @@ import {ncp} from 'ncp';
 import path from 'path';
 import {buildPackageJson} from './package-json';
 
-export async function createProject({contract, frontend, tests, projectPath, projectName, verbose, rootDir}: CreateProjectParams): Promise<boolean> {
+export async function createProject({example, contract, frontend, tests, projectPath, projectName, verbose, rootDir}: CreateProjectParams): Promise<boolean> {
   // Create files in the project folder
-  await createFiles({contract, frontend, projectName, tests, projectPath, verbose, rootDir});
+  await createFiles({example, contract, frontend, projectName, tests, projectPath, verbose, rootDir});
 
   // Create package.json
-  const packageJson = buildPackageJson({contract, frontend, tests, projectName});
+  const packageJson = buildPackageJson({example, contract, frontend, tests, projectName});
   fs.writeFileSync(path.resolve(projectPath, 'package.json'), Buffer.from(JSON.stringify(packageJson, null, 2)));
 
   return true;

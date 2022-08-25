@@ -1,16 +1,16 @@
-import {Contract, CreateProjectParams, TestingFramework} from './types';
+import {Contract, CreateProjectParams, Example, TestingFramework} from './types';
 
 type Entries = Record<string, unknown>;
-type PackageBuildParams = Pick<CreateProjectParams, 'contract' | 'frontend' | 'tests' | 'projectName'>;
+type PackageBuildParams = Pick<CreateProjectParams, 'example' | 'contract' | 'frontend' | 'tests' | 'projectName'>;
 
-export function buildPackageJson({contract, frontend, tests, projectName}: PackageBuildParams): Entries {
+export function buildPackageJson({example, contract, frontend, tests, projectName}: PackageBuildParams): Entries {
   const result = basePackage({
-    contract, frontend, tests, projectName,
+    example, contract, frontend, tests, projectName,
   });
   return result;
 }
 
-function basePackage({contract, frontend, tests, projectName}: PackageBuildParams): Entries {
+function basePackage({example, contract, frontend, tests, projectName}: PackageBuildParams): Entries {
   const hasFrontend = frontend !== 'none';
   return {
     'name': projectName,
@@ -18,12 +18,12 @@ function basePackage({contract, frontend, tests, projectName}: PackageBuildParam
     'license': '(MIT AND Apache-2.0)',
     'scripts': {
       ...startScript(hasFrontend),
-      ...deployScript(contract),
+      ...deployScript(example, contract),
       ...buildScript(hasFrontend),
       ...buildContractScript(contract),
       'test': 'npm run test:unit && npm run test:integration',
       ...unitTestScripts(contract),
-      ...integrationTestScripts(contract, tests),
+      ...integrationTestScripts(example, contract, tests),
       ...npmInstallScript(contract, hasFrontend, tests),
     },
     'devDependencies': {
@@ -61,7 +61,7 @@ const buildContractScript = (contract: Contract): Entries => {
   }
 };
 
-const deployScript = (contract: Contract): Entries => {
+const deployScript = (example: Example, contract: Contract): Entries => {
   switch (contract) {
     case 'assemblyscript':
     case 'js':
@@ -70,7 +70,7 @@ const deployScript = (contract: Contract): Entries => {
       };
     case 'rust':
       return {
-        'deploy': 'npm run build:contract && cd contract && near dev-deploy --wasmFile ./target/wasm32-unknown-unknown/release/hello_near.wasm',
+        'deploy': `npm run build:contract && cd contract && near dev-deploy --wasmFile ./target/wasm32-unknown-unknown/release/${example}.wasm`,
       };
   }
 };
@@ -85,39 +85,23 @@ const unitTestScripts = (contract: Contract): Entries => {
   }
 };
 
-const integrationTestScripts = (contract: Contract, tests: TestingFramework): Entries => {
+const integrationTestScripts = (example: Example, contract: Contract, tests: TestingFramework): Entries => {
+  let wasm_path: String = "";
   switch (contract) {
-    case 'assemblyscript':
-      if (tests === 'js') {
-        return {
-          'test:integration': 'npm run build:contract && cd integration-tests && npm test -- -- "./contract/build/release/hello_near.wasm"',
-        };
-      } else {
-        return {
-          'test:integration': 'npm run build:contract && cd integration-tests && cargo run --example integration-tests "../contract/build/release/hello_near.wasm"',
-        };
-      }
-    case 'js':
-      if (tests === 'js') {
-        return {
-          'test:integration': 'npm run build:contract && cd integration-tests && npm test  -- -- "./contract/build/hello_near.wasm"',
-        };
-      } else {
-        return {
-          'test:integration': 'npm run build:contract && cd integration-tests && cargo run --example integration-tests "../contract/build/hello_near.wasm"',
-        };
-      }
-    case 'rust':
-      if (tests === 'js') {
-        return {
-          'test:integration': 'npm run build:contract && cd integration-tests && npm test  -- -- "./contract/target/wasm32-unknown-unknown/release/hello_near.wasm"',
-        };
-      } else {
-        return {
-          'test:integration': 'npm run build:contract && cd integration-tests && cargo run --example integration-tests "../contract/target/wasm32-unknown-unknown/release/hello_near.wasm"',
-        };
-      }
+    case 'assemblyscript': wasm_path = `contract/build/release/${example}.wasm`; break;
+    case 'js': wasm_path = `contract/build/${example}.wasm`; break;
+    case 'rust': wasm_path = `contract/target/wasm32-unknown-unknown/release/${example}.wasm`; break;
   }
+
+  let run_test: String = "";
+  switch(tests){
+    case 'js': run_test = `npm test -- -- "./${wasm_path}"`; break;
+    case 'rust': run_test =`cargo run --example integration-tests "../${wasm_path}"`; break;
+  }
+
+  return {
+    'test:integration': `npm run build:contract && cd integration-tests && ${run_test}`,
+  };
 };
 
 const npmInstallScript = (contract: Contract, hasFrontend: boolean, tests: TestingFramework): Entries => {

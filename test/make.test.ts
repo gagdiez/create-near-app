@@ -14,11 +14,12 @@ describe('create', () => {
   const ts = Date.now();
   test.each(testMatrix)('%o %o %o', async (contract: Contract, frontend: Frontend, tests: TestingFramework) => {
     const projectName = `${contract}_${frontend}_${tests}`;
-    const rootDir = path.resolve(__dirname, '../templates/');
+    const rootDir = path.resolve(__dirname, '../templates/hello_near');
     fs.mkdirSync(path.resolve(__dirname, `../_testrun/${ts}`), {recursive: true});
     const projectPathPrefix = path.resolve(__dirname, `../_testrun/${ts}`);
     const projectPath = path.resolve(projectPathPrefix, projectName);
     await createProject({
+      example: "hello_near",
       contract,
       frontend,
       tests,
