@@ -72,7 +72,7 @@ const exampleChoices: Choices<Example> = [
 const contractChoices: Choices<Contract> = [
   {title: 'TypeScript', value: 'js'},
   {title: 'Rust', value: 'rust'},
-  {title: 'AssemblyScript', value: 'assemblyscript'},
+  {title: 'AssemblyScript', value: 'as'},
 ];
 const testsChoices: Choices<TestingFramework> = [
   {title: 'Rust Sandbox Tests', value: 'rust'},

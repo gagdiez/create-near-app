@@ -46,7 +46,7 @@ const buildScript = (hasFrontend: boolean): Entries => hasFrontend ? {
 
 const buildContractScript = (contract: Contract): Entries => {
   switch (contract) {
-    case 'assemblyscript':
+    case 'as':
     case 'js':
       return {
         'build:contract': 'cd contract && npm run build',
@@ -60,7 +60,7 @@ const buildContractScript = (contract: Contract): Entries => {
 
 const deployScript = (contract: Contract): Entries => {
   switch (contract) {
-    case 'assemblyscript':
+    case 'as':
     case 'js':
       return {
         'deploy': 'cd contract && npm run deploy',
@@ -75,7 +75,7 @@ const deployScript = (contract: Contract): Entries => {
 const unitTestScripts = (contract: Contract): Entries => {
   switch (contract) {
     case 'js':
-    case 'assemblyscript':
+    case 'as':
       return {'test:unit': 'cd contract && npm test'};
     case 'rust':
       return {'test:unit': 'cd contract && cargo test'};
@@ -85,7 +85,7 @@ const unitTestScripts = (contract: Contract): Entries => {
 const integrationTestScripts = (contract: Contract, tests: TestingFramework): Entries => {
   let wasm_path: String = "";
   switch (contract) {
-    case 'assemblyscript': wasm_path = `contract/build/release/contract.wasm`; break;
+    case 'as': wasm_path = `contract/build/release/contract.wasm`; break;
     case 'js': wasm_path = `contract/build/contract.wasm`; break;
     case 'rust': wasm_path = `contract/target/wasm32-unknown-unknown/release/contract.wasm`; break;
   }
@@ -102,48 +102,20 @@ const integrationTestScripts = (contract: Contract, tests: TestingFramework): En
 };
 
 const npmInstallScript = (contract: Contract, hasFrontend: boolean, tests: TestingFramework): Entries => {
+  const frontend_install = hasFrontend? 'cd frontend && npm install && cd ..' : 'echo no frontend';
+  const test_install = (tests === 'js')? 'cd integration-tests && npm install && cd ..' : 'echo rs tests';
+
+  let contract_install = ''
   switch (contract) {
-    case 'assemblyscript':
-      if (hasFrontend) {
-        if (tests === 'js') {
-          return {'postinstall': 'cd contract && npm install --ignore-scripts && cd ../integration-tests && npm install && cd ../frontend && npm install && cd ..'};
-        } else {
-          return {'postinstall': 'cd contract && npm install --ignore-scripts && cd ../frontend && npm install && cd ..'};
-        }
-      } else {
-        if (tests === 'js') {
-          return {'postinstall': 'cd contract && npm install --ignore-scripts && cd ../integration-tests && npm install && cd ..'};
-        } else {
-          return {'postinstall': 'cd contract && npm install --ignore-scripts && cd ..'};
-        }
-      }
+    case 'as':
+      contract_install = 'cd contract && npm install --ignore-scripts'; break;
     case 'js':
-      if (hasFrontend) {
-        if (tests === 'js') {
-          return {'postinstall': 'cd contract && npm install && cd ../integration-tests && npm install && cd ../frontend && npm install && cd ..'};
-        } else {
-          return {'postinstall': 'cd contract && npm install && cd ../frontend && npm install && cd ..'};
-        }
-      } else {
-        if (tests === 'js') {
-          return {'postinstall': 'cd contract && npm install && cd ../integration-tests && npm install && cd ..'};
-        } else {
-          return {'postinstall': 'cd contract && npm install && cd ..'};
-        }
-      }
+      contract_install = 'cd contract && npm install'; break;
     case 'rust':
-      if (hasFrontend) {
-        if (tests === 'js') {
-          return {'postinstall': 'cd frontend && npm install && cd ../integration-tests && npm install && cd ..'};
-        } else {
-          return {'postinstall': 'cd frontend && npm install && cd ..'};
-        }
-      } else {
-        if (tests === 'js') {
-          return {'postinstall': 'cd ./integration-tests && npm install && cd ..'};
-        } else {
-          return {};
-        }
-      }
+      contract_install = 'echo rs contract'; break;
+  }
+
+  return {
+    'postinstall': `${frontend_install} && ${test_install} && ${contract_install}`
   }
 };

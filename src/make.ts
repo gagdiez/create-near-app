@@ -34,6 +34,8 @@ export async function createFiles({example, contract, frontend, tests, projectPa
 
     const srcExampleFrontend = `${rootDir}/${example}/frontend/${frontend}`;
     await copyDir(srcExampleFrontend, `${projectPath}/frontend`, {verbose, skip: skip.map(f => path.join(srcExampleFrontend, f))});
+  
+    fs.copyFileSync(`${rootDir}/shared/frontend/start.sh`, `${projectPath}/frontend/start.sh`)
   }
 
   // copy contract files
