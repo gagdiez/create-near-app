@@ -31,7 +31,7 @@ import * as show from './messages';
       tests,
       projectName,
       verbose: false,
-      rootDir: path.resolve(__dirname, `../templates/${example}`),
+      rootDir: path.resolve(__dirname, `../templates`),
       projectPath,
     });
   } catch (e) {

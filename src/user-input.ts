@@ -21,7 +21,7 @@ import fs from 'fs';
 export async function getUserArgs(): Promise<UserConfig> {
   program
     .argument('[projectName]')
-    .option('--examples <examples>')
+    .option('--example <example>')
     .option('--contract <contract>')
     .option('--frontend <frontend>')
     .option('--tests <tests>')
@@ -63,8 +63,8 @@ export function validateUserArgs(args: UserConfig): 'error' | 'ok' | 'none' {
 
 type Choices<T> = {title: string, value: T}[];
 const exampleChoices: Choices<Example> = [
-  {title: 'Hello NEAR', value: 'hello_near'},
-  {title: 'Count on NEAR', value: 'count_near'},
+  {title: 'Hello NEAR', value: 'hello-near'},
+  {title: 'Count on NEAR', value: 'count-near'},
   {title: 'Guest Book', value: 'guest-book'},
   {title: 'Donation', value: 'donation'},
   {title: 'Cross-Contract Call', value: 'xcc'},

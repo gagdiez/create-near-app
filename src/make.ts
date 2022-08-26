@@ -1,60 +1,75 @@
 import {CreateProjectParams} from './types';
 import * as show from './messages';
 import spawn from 'cross-spawn';
-import fs from 'fs';
+import fs, { mkdirSync } from 'fs';
 import {ncp} from 'ncp';
 import path from 'path';
 import {buildPackageJson} from './package-json';
+let nunjucks = require('nunjucks')
 
 export async function createProject({example, contract, frontend, tests, projectPath, projectName, verbose, rootDir}: CreateProjectParams): Promise<boolean> {
   // Create files in the project folder
   await createFiles({example, contract, frontend, projectName, tests, projectPath, verbose, rootDir});
 
   // Create package.json
-  const packageJson = buildPackageJson({example, contract, frontend, tests, projectName});
+  const packageJson = buildPackageJson({contract, frontend, tests, projectName});
   fs.writeFileSync(path.resolve(projectPath, 'package.json'), Buffer.from(JSON.stringify(packageJson, null, 2)));
 
   return true;
 }
 
-export async function createFiles({contract, frontend, tests, projectPath, verbose, rootDir}: CreateProjectParams) {
+export async function createFiles({example, contract, frontend, tests, projectPath, verbose, rootDir}: CreateProjectParams) {
   // skip build artifacts and symlinks
   const skip = ['.cache', 'dist', 'out', 'node_modules'];
 
-  // copy frontend
-  if (frontend !== 'none') {
-    const sourceTemplateDir = `${rootDir}/frontend/${frontend}`;
-    await copyDir(sourceTemplateDir, projectPath, {verbose, skip: skip.map(f => path.join(sourceTemplateDir, f))});
-  }
+  // make project folder
+  mkdirSync(projectPath);
 
-  // shared files
-  const sourceSharedDir = `${rootDir}/shared`;
-  await copyDir(sourceSharedDir, projectPath, {verbose, skip: skip.map(f => path.join(sourceSharedDir, f))});
+  // make frontend (if any)
+  if (frontend !== 'none') {
+    mkdirSync(`${projectPath}/frontend`)
+
+    const srcSharedFrontend = `${rootDir}/shared/frontend/${frontend}`;
+    await copyDir(srcSharedFrontend, `${projectPath}/frontend`, {verbose, skip: skip.map(f => path.join(srcSharedFrontend, f))});
+
+    const srcExampleFrontend = `${rootDir}/${example}/frontend/${frontend}`;
+    await copyDir(srcExampleFrontend, `${projectPath}/frontend`, {verbose, skip: skip.map(f => path.join(srcExampleFrontend, f))});
+  }
 
   // copy contract files
-  const contractSourceDir = `${rootDir}/contracts/${contract}`;
-  await copyDir(contractSourceDir, `${projectPath}/contract`, {
-    verbose,
-    skip: skip.map(f => path.join(contractSourceDir, f))
-  });
+  const srcSharedContract = `${rootDir}/shared/contracts/${contract}`;
+  await copyDir(srcSharedContract, `${projectPath}/contract`, {verbose, skip: skip.map(f => path.join(srcSharedContract, f))});
+
+  const srcExampleContract = `${rootDir}/${example}/contracts/${contract}`;
+  await copyDir(srcExampleContract, `${projectPath}/contract/src`, {verbose, skip: skip.map(f => path.join(srcExampleContract, f))});
 
   // copy tests - shared files
-  let sourceTestSharedDir = path.resolve(`${rootDir}/integration-tests/shared/${tests}-tests`);
-  await copyDir(sourceTestSharedDir, `${projectPath}/integration-tests/`, {
-    verbose,
-    skip: skip.map(f => path.join(sourceTestSharedDir, f))
-  });
-  // copy tests - overrides files
-  let sourceTestOverridesDir = path.resolve(`${rootDir}/integration-tests/overrides/${contract}-contract/${tests}-tests`);
-  if (fs.existsSync(sourceTestOverridesDir)) {
-    await copyDir(sourceTestOverridesDir, `${projectPath}/integration-tests/`, {
-      verbose,
-      skip: skip.map(f => path.join(sourceTestOverridesDir, f))
-    });
-  }
+  const srcSharedTest = path.resolve(`${rootDir}/shared/integration-tests/${tests}-tests`);
+  await copyDir(srcSharedTest, `${projectPath}/integration-tests/`, {verbose, skip: skip.map(f => path.join(srcSharedTest, f))});
 
-  // add .gitignore
+  const srcExampleTest = path.resolve(`${rootDir}/${example}/integration-tests/${tests}-tests`);
+  nunjucks.configure(srcExampleTest, { autoescape: false });
+
+  // handle js init
+  let js_init = "";
+  if(contract == 'js'){
+    js_init = tests == 'js'? "await contract.call(contract, 'init', {});" : 'contract.call(&worker, "init").transact().await?;';
+  }
+  const tst_file = tests == 'js'? 'main.ava.ts' : 'tests.rs';
+  const test_rendered = nunjucks.render(tst_file, { js_template_init: js_init });
+  await fs.writeFileSync(`${projectPath}/integration-tests/src/${tst_file}`, test_rendered)
+
+  // shared files
+  const srcSharedFiles = `${rootDir}/shared/shared`;
+  await copyDir(srcSharedFiles, projectPath, {verbose, skip: skip.map(f => path.join(srcSharedFiles, f))});
+  
   await renameFile(`${projectPath}/near.gitignore`, `${projectPath}/.gitignore`);
+
+  // copy readme
+  let color = contract == "rust"? "red":"yellow";
+  nunjucks.configure(`${rootDir}/${example}/`, { autoescape: false });
+  const readme = nunjucks.render("README.md", { color: color, language: contract, example});
+  await fs.writeFileSync(`${projectPath}/README.md`, readme)
 }
 
 export const renameFile = async function (oldPath: string, newPath: string) {

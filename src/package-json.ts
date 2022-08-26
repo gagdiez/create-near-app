@@ -1,16 +1,16 @@
-import {Contract, CreateProjectParams, Example, TestingFramework} from './types';
+import {Contract, CreateProjectParams, TestingFramework} from './types';
 
 type Entries = Record<string, unknown>;
-type PackageBuildParams = Pick<CreateProjectParams, 'example' | 'contract' | 'frontend' | 'tests' | 'projectName'>;
+type PackageBuildParams = Pick<CreateProjectParams, 'contract' | 'frontend' | 'tests' | 'projectName'>;
 
-export function buildPackageJson({example, contract, frontend, tests, projectName}: PackageBuildParams): Entries {
+export function buildPackageJson({contract, frontend, tests, projectName}: PackageBuildParams): Entries {
   const result = basePackage({
-    example, contract, frontend, tests, projectName,
+    contract, frontend, tests, projectName,
   });
   return result;
 }
 
-function basePackage({example, contract, frontend, tests, projectName}: PackageBuildParams): Entries {
+function basePackage({contract, frontend, tests, projectName}: PackageBuildParams): Entries {
   const hasFrontend = frontend !== 'none';
   return {
     'name': projectName,
@@ -18,12 +18,12 @@ function basePackage({example, contract, frontend, tests, projectName}: PackageB
     'license': '(MIT AND Apache-2.0)',
     'scripts': {
       ...startScript(hasFrontend),
-      ...deployScript(example, contract),
+      ...deployScript(contract),
       ...buildScript(hasFrontend),
       ...buildContractScript(contract),
       'test': 'npm run test:unit && npm run test:integration',
       ...unitTestScripts(contract),
-      ...integrationTestScripts(example, contract, tests),
+      ...integrationTestScripts(contract, tests),
       ...npmInstallScript(contract, hasFrontend, tests),
     },
     'devDependencies': {
@@ -61,7 +61,7 @@ const buildContractScript = (contract: Contract): Entries => {
   }
 };
 
-const deployScript = (example: Example, contract: Contract): Entries => {
+const deployScript = (contract: Contract): Entries => {
   switch (contract) {
     case 'assemblyscript':
     case 'js':
@@ -70,7 +70,7 @@ const deployScript = (example: Example, contract: Contract): Entries => {
       };
     case 'rust':
       return {
-        'deploy': `npm run build:contract && cd contract && near dev-deploy --wasmFile ./target/wasm32-unknown-unknown/release/${example}.wasm`,
+        'deploy': `npm run build:contract && cd contract && near dev-deploy --wasmFile ./target/wasm32-unknown-unknown/release/contract.wasm`,
       };
   }
 };
@@ -85,12 +85,12 @@ const unitTestScripts = (contract: Contract): Entries => {
   }
 };
 
-const integrationTestScripts = (example: Example, contract: Contract, tests: TestingFramework): Entries => {
+const integrationTestScripts = (contract: Contract, tests: TestingFramework): Entries => {
   let wasm_path: String = "";
   switch (contract) {
-    case 'assemblyscript': wasm_path = `contract/build/release/${example}.wasm`; break;
-    case 'js': wasm_path = `contract/build/${example}.wasm`; break;
-    case 'rust': wasm_path = `contract/target/wasm32-unknown-unknown/release/${example}.wasm`; break;
+    case 'assemblyscript': wasm_path = `contract/build/release/contract.wasm`; break;
+    case 'js': wasm_path = `contract/build/contract.wasm`; break;
+    case 'rust': wasm_path = `contract/target/wasm32-unknown-unknown/release/contract.wasm`; break;
   }
 
   let run_test: String = "";
