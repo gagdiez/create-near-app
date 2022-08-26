@@ -43,7 +43,7 @@ import * as show from './messages';
   }
 
   if (createSuccess) {
-    show.setupSuccess(projectPath, contract, frontend, install);
+    show.setupSuccess(projectName, contract, frontend, install);
   } else {
     show.setupFailed();
     return;

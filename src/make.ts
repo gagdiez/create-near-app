@@ -43,6 +43,10 @@ export async function createFiles({example, contract, frontend, tests, projectPa
   const srcExampleContract = `${rootDir}/${example}/contracts/${contract}`;
   await copyDir(srcExampleContract, `${projectPath}/contract/src`, {verbose, skip: skip.map(f => path.join(srcExampleContract, f))});
 
+  // tests dir
+  const targetTestDir = path.resolve(projectPath, 'integration-tests');
+  fs.mkdirSync(targetTestDir, { recursive: true });
+
   // copy tests - shared files
   const srcSharedTest = path.resolve(`${rootDir}/shared/integration-tests/${tests}-tests`);
   await copyDir(srcSharedTest, `${projectPath}/integration-tests/`, {verbose, skip: skip.map(f => path.join(srcSharedTest, f))});
