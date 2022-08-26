@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./build.sh
+npm run build
 
 echo ">> Deploying contract"
 

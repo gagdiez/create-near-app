@@ -71,7 +71,7 @@ export async function createFiles({example, contract, frontend, tests, projectPa
   const srcSharedFiles = `${rootDir}/shared/shared`;
   await copyDir(srcSharedFiles, projectPath, {verbose, skip: skip.map(f => path.join(srcSharedFiles, f))});
   
-  await renameFile(`${projectPath}/near.gitignore`, `${projectPath}/.gitignore`);
+  await renameFile(`${projectPath}/template.gitignore`, `${projectPath}/.gitignore`);
 
   // copy readme
   let color = contract == "rust"? "red":"yellow";

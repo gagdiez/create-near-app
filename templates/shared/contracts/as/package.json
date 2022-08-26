@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "license": "(MIT AND Apache-2.0)",
   "scripts": {
-    "build": "./build.sh",
-    "deploy": "./deploy.sh",
+    "build": "asb",
+    "deploy": "npm run build && near dev-deploy --wasmFile ./build/release/contract.wasm",
     "test": "asp --nologo"
   },
   "dependencies": {
