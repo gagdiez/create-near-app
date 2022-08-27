@@ -21,7 +21,7 @@ function basePackage({contract, frontend, tests, projectName}: PackageBuildParam
       ...deployScript(contract),
       ...buildScript(hasFrontend),
       ...buildContractScript(contract),
-      'test': 'npm run test:unit && npm run test:integration',
+      'test': 'npm run build:contract && npm run test:unit && npm run test:integration',
       ...unitTestScripts(contract),
       ...integrationTestScripts(contract, tests),
       ...npmInstallScript(contract, hasFrontend, tests),
@@ -97,7 +97,7 @@ const integrationTestScripts = (contract: Contract, tests: TestingFramework): En
   }
 
   return {
-    'test:integration': `npm run build:contract && cd integration-tests && ${run_test}`,
+    'test:integration': `cd integration-tests && ${run_test}`,
   };
 };
 

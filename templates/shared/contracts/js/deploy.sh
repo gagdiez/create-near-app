@@ -1,13 +1,13 @@
 #!/bin/sh
 
+# build the contract
 npm run build
 
-echo ">> Deploying contract"
-
-# https://docs.near.org/tools/near-cli#near-dev-deploy
+# deploy the contract
 near dev-deploy --wasmFile build/contract.wasm
 
+# get where the contract was deploy
 export CONTRACT_NAME=$(cat ./neardev/dev-account)
 
-# js contracts always need to be initialized
+# initialize it with no arguments
 near call $CONTRACT_NAME init --accountId $CONTRACT_NAME --deposit 1

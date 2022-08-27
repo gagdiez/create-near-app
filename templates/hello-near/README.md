@@ -13,8 +13,8 @@ Hello NEAR! is a friendly decentralized App that stores a greeting message. It i
 
 # What This Example Shows
 
-1. How to integrate a smart contract into a decentralized application.
-2. How to store and retrieve information to and from the NEAR blockchain.
+1. How to store and retrieve information in the NEAR network.
+2. How to integrate a smart contract in a web frontend.
 
 <br />
 
@@ -28,25 +28,26 @@ npm install
 ```
 
 ### 2. Test the Contract
-This example repo comes with sandbox tests!. They automatically deploy your contract and simulate interactions from users in a realistic scenario.
+Deploy your contract in a sandbox and simulate interactions from users.
 
 ```bash
 npm test
 ```
 
 ### 3. Deploy the Contract
-Automatically build the contract and deploy it in a testnet account
+Build the contract and deploy it in a testnet account
 ```bash
 npm run deploy
 ```
 
 ### 4. Start the Frontend
+Start the web application to interact with your smart contract 
 ```bash
 npm start
 ```
 
-<br />
+---
 
 # Learn More
-1. Check the [README](./contract/README.md) inside of the `./contract` folder.
+1. Learn more about the contract through its [README](./contract/README.md).
 2. Check [**our documentation**](https://docs.near.org/develop/welcome).

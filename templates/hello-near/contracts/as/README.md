@@ -1,26 +1,62 @@
-Hello NEAR!
-===========
+# Hello NEAR Contract
 
-A [smart contract] written in [AssemblyScript] for an app initialized with [create-near-app]
+The smart contract consists of two methods available for the user to call.
 
+```ts
+const DEFAULT_GREETING: string = 'Hello';
 
-Quick Start
-===========
+// Public - returns the stored greeting defaulting to 'Hello'
+export function get_greeting(): string {
+  return storage.getPrimitive('message', DEFAULT_GREETING);
+}
 
-Before you compile this code, you will need to install [Node.js] ≥ 16
+// Public - accepts a new greeting, such as 'howdy', and records it
+export function set_greeting(message: string): void {
+  storage.set('message', message);
+}
+```
 
+---
 
-Exploring The Code
-==================
+# Quickstart
 
-1. The main smart contract code lives in `assembly/index.ts`.
-2. There are two functions to the smart contract: `get_greeting` and `set_greeting`.
-3. Tests: You can run smart contract tests with the `npm run test` script. This runs
-   standard AssemblyScript tests using [as-pect].
+You can automatically compile and deploy the contract in a "dev-account" by running:
 
+```bash
+npm run deploy
+```
 
-  [smart contract]: https://docs.near.org/develop/welcome
-  [AssemblyScript]: https://www.assemblyscript.org/
-  [create-near-app]: https://github.com/near/create-near-app
-  [Node.js]: https://nodejs.org/en/download/package-manager/
-  [as-pect]: https://www.npmjs.com/package/@as-pect/cli
+Once finished, check the `neardev/dev-account` file to find the address in which the contract was deployed:
+
+```bash
+cat ./neardev/dev-account
+# e.g. dev-1659899566943-21539992274727
+```
+
+---
+
+## Calling Methods From the Terminal
+Once your contract is deployed you can interact with it from the `../frontend` or directly in the terminal. 
+
+### Retrieving the Greeting
+`get_greeting` is a read-only method (aka `view` method). `View` methods can be called for **free** by anyone, even people without a NEAR account!
+```bash
+near view <dev-account> get_greeting
+```
+
+### Storing a Greeting
+`set_greeting` changes the contract's state, meaning it is a `call` method. `Call` methods can only be invoked using a NEAR account, since the account needs to pay GAS for the transaction.
+
+```bash
+# call the `set_greeting` method
+near call <dev-account> set_greeting '{"message":"howdy"}' --accountId <dev-account>
+```
+
+#### Tip
+If you would like to call `set_greeting` using your own account, first login into NEAR using:
+
+```bash
+near login
+```
+
+and then use your account to sign the transaction: `--accountId <your-account>`.
