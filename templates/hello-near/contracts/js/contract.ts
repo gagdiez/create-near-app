@@ -1,33 +1,31 @@
 import { NearBindgen, NearContract, near, call, view } from 'near-sdk-js';
 
-// The @NearBindgen decorator allows this code to compile to Base64.
+// The @NearBindgen decorator allows this code to compile
+// to a NEAR-compatible Wasm file.
 @NearBindgen
 class HelloNear extends NearContract {
   greeting: string;
 
-  constructor({message="Hello"}:{message: string}) {
-    //execute the NEAR Contract's constructor
+  constructor({greeting}:{greeting: string}) {
     super();
-    this.greeting = message;
+    this.greeting = greeting;
   }
 
-  default(){ return new HelloNear({message: "Hello"}) }
+  default(){ return new HelloNear({greeting: 'Hello'}) }
 
-  // @call indicates that this is a 'change method' or a function
-  // that changes state on the blockchain. Change methods cost gas.
-  // For more info -> https://docs.near.org/docs/concepts/gas
+  // @call indicates that this is a method that changes the
+  // contract's state. Change methods cost gas to the caller.
   @call
-  set_greeting({ message }: { message: string }): void {
-    near.log(`Saving greeting ${message}`);
-    this.greeting = message;
+  set_greeting({ greeting }: { greeting: string }): void {
+    // Record a log permanently to the blockchain!
+    near.log(`Saving greeting ${greeting}`);
+    this.greeting = greeting;
   }
 
-  // @view indicates a 'view method' or a function that returns
-  // the current values stored on the blockchain. View calls are free
-  // and do not cost gas.
+  // @view indicates the function performs read-only operations
+  // View calls are free and do not cost gas to the caller.
   @view
   get_greeting(): string {
-    near.log(`The current greeting is ${this.greeting}`);
     return this.greeting;
   }
 }
