@@ -1,18 +1,21 @@
-import "regenerator-runtime/runtime";
-import * as Contract from './near-interface';
-import * as Wallet from './near-wallet';
+import 'regenerator-runtime/runtime'
+import { Contract } from './near-interface';
+import { Wallet } from './near-wallet'
 
-// `nearInitPromise` gets called on page load
-window.nearInitPromise = Wallet.startUp()
-                        .then(isSignedIn => flow(isSignedIn))
-                        .catch(console.error)
+// create the Wallet and the Contract
+window.wallet = new Wallet({contractId: process.env.CONTRACT_NAME});
+window.contract = new Contract({wallet: window.wallet})
 
-function flow(isSignedIn){
+//  Setup on page load
+window.onload = async () => {
+  const isSignedIn = await wallet.startUp();
+
   if (isSignedIn){
     signedInFlow()
   }else{
     signedOutFlow()
   }
+
   updateUI()
 }
 
@@ -32,27 +35,27 @@ document.querySelector('#d').addEventListener('click', () => {
   document.querySelector('.dot').classList.toggle('on');
 });
 
-// Buttons - Interact with the Smart Contract
+// Buttons - Interact with the Smart contract
 document.querySelector('#plus').addEventListener('click', async () => {
   resetUI();
-  await Contract.counterIncrement();
+  await contract.counterIncrement();
   await updateUI();
 });
 
 document.querySelector('#minus').addEventListener('click', async  () => {
   resetUI();
-  await Contract.counterDecrement();
+  await contract.counterDecrement();
   await updateUI();
 });
 document.querySelector('#a').addEventListener('click', async  () => {
   resetUI();
-  await Contract.counterReset();
+  await contract.counterReset();
   await updateUI();
 });
 
 // Log in and log out users using NEAR Wallet
-document.querySelector('.sign-in .btn').onclick = Wallet.signIn;
-document.querySelector('.sign-out .btn').onclick = Wallet.signOut;
+document.querySelector('.sign-in .btn').onclick = () => { wallet.signIn() }
+document.querySelector('.sign-out .btn').onclick = () => { wallet.signOut() }
 
 // Display the signed-out-flow container
 function signedOutFlow() {
@@ -67,7 +70,7 @@ async function signedInFlow() {
 }
 
 async function updateUI(){
-  let count = await Contract.getCounter();
+  let count = await contract.getCounter();
   
   document.querySelector('#show').classList.replace('loader','number');
   document.querySelector('#show').innerText = count === undefined ? 'calculating...' : count;

@@ -1,24 +1,28 @@
 import 'regenerator-runtime/runtime';
-import * as Contract from './near-interface';
-import * as Wallet from './near-wallet';
+import { Contract } from './near-interface';
+import { Wallet } from './near-wallet';
 
-document.querySelector('form').onsubmit = doUserAction;
-document.querySelector('#sign-in-button').onclick = Wallet.signIn;
-document.querySelector('#sign-out-button').onclick = Wallet.signOut;
+// create the Wallet and the Contract
+window.wallet = new Wallet({contractId: process.env.CONTRACT_NAME});
+window.contract = new Contract({wallet: window.wallet})
 
-// nearInitPromise gets called on page load
-window.nearInitPromise = Wallet.startUp()
-                         .then(isSignedIn => flow(isSignedIn))
-                         .catch(console.error)
+//  Setup on page load
+window.onload = async () => {
+  let isSignedIn = await wallet.startUp()
 
-function flow(isSignedIn){
   if(isSignedIn){
     signedInFlow()
   }else{
     signedOutFlow()
   }
+
   fetchGreeting();
 }
+
+// Button clicks
+document.querySelector('form').onsubmit = doUserAction;
+document.querySelector('#sign-in-button').onclick = () => { wallet.signIn() }
+document.querySelector('#sign-out-button').onclick = () => { wallet.signOut() } 
 
 // Take the new greeting and send it to the contract
 async function doUserAction(event) {
@@ -28,7 +32,7 @@ async function doUserAction(event) {
   document.querySelector('#signed-in-flow main')
           .classList.add('please-wait');
 
-  await Contract.setGreeting(greeting.value);
+  await contract.setGreeting(greeting.value);
 
   // ===== Fetch the data from the blockchain =====
   await fetchGreeting();
@@ -38,7 +42,7 @@ async function doUserAction(event) {
 
 // Get greeting from the contract on chain
 async function fetchGreeting() {
-  const currentGreeting = await Contract.getGreeting();
+  const currentGreeting = await contract.getGreeting();
 
   document.querySelectorAll('[data-behavior=greeting]').forEach(el => {
     el.innerText = currentGreeting;
@@ -57,6 +61,6 @@ function signedInFlow() {
   document.querySelector('#signed-out-flow').style.display = 'none';
   document.querySelector('#signed-in-flow').style.display = 'block';
   document.querySelectorAll('[data-behavior=account-id]').forEach(el => {
-    el.innerText = window.accountId;
+    el.innerText = wallet.accountId;
   });
 }

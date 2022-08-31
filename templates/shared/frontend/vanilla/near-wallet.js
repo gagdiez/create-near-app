@@ -12,90 +12,97 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupLedger } from "@near-wallet-selector/ledger";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 
+// Wallet that simplifies using the wallet selector
+export class Wallet {
+  walletSelector;
+  wallet;
+  accountId;
+  contractId;
 
-// To be called when the website loads
-export async function startUp() {
-  window.walletSelector = await setupWalletSelector({
-    network: "testnet",
-    modules: [setupMyNearWallet({ iconUrl: MyNearIconUrl }),
-    setupLedger({ iconUrl: LedgerIconUrl })],
-  });;
-
-  const isSignedIn = window.walletSelector.isSignedIn();
-
-  if (isSignedIn) {
-    const { contract: { contractId }, accounts } = walletSelector.store.getState();
-
-    window.wallet = await walletSelector.wallet();
-    window.accountId = accounts[0].accountId;
-    window.contractId = contractId;
+  constructor({contractId}){
+    this.contractId = contractId;
   }
 
-  return isSignedIn
-}
+  // To be called when the website loads
+  async startUp() {
+    console.log("startup")
+    this.walletSelector = await setupWalletSelector({
+      network: "testnet",
+      modules: [setupMyNearWallet({ iconUrl: MyNearIconUrl }),
+      setupLedger({ iconUrl: LedgerIconUrl })],
+    });;
 
+    const isSignedIn = this.walletSelector.isSignedIn();
 
-// Sign-in method
-export function signIn() {
-  const description = "Please select a wallet to sign in."
-  modal = setupModal(window.walletSelector, { contractId: process.env.CONTRACT_NAME, description })
-  modal.show()
-}
+    if (isSignedIn) {
+      const { accounts } = this.walletSelector.store.getState();
 
+      this.wallet = await this.walletSelector.wallet();
+      this.accountId = accounts[0].accountId;
+    }
 
-// Sign-out method
-export function signOut() {
-  window.wallet.signOut()
-  window.location.replace(window.location.origin + window.location.pathname);
-}
+    return isSignedIn
+  }
 
+  // Sign-in method
+  signIn() {
+    const description = "Please select a wallet to sign in."
+    console.log(this.walletSelector)
+    const modal = setupModal(this.walletSelector, { contractId: this.contractId, description })
+    modal.show()
+  }
 
-// Make a read-only call to retrieve information from the network
-export async function viewMethod({ method, args = {} }) {
-  const { network } = window.walletSelector.options;
-  const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
+  // Sign-out method
+  signOut() {
+    this.wallet.signOut()
+    this.wallet = this.accountId = this.contractId = null;
+    window.location.replace(window.location.origin + window.location.pathname);
+  }
 
-  let res = await provider.query({
-    request_type: "call_function",
-    account_id: process.env.CONTRACT_NAME,
-    method_name: method,
-    args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
-    finality: "optimistic",
-  })
-  return JSON.parse(Buffer.from(res.result).toString());
-}
+  // Make a read-only call to retrieve information from the network
+  async viewMethod({ contractId = this.contractId, method, args = {} }) {
+    const { network } = this.walletSelector.options;
+    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
 
+    let res = await provider.query({
+      request_type: "call_function",
+      account_id: contractId,
+      method_name: method,
+      args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
+      finality: "optimistic",
+    })
+    return JSON.parse(Buffer.from(res.result).toString());
+  }
 
-// Call a method that changes the contract's state
-export async function callMethod({ method, args = {}, gas = 3000000000000, deposit = 0 }) {
-  const { contract: { contractId }, accounts } = window.walletSelector.store.getState();
-  const { accountId } = accounts[0]
-  const wallet = await window.walletSelector.wallet();
+  // Call a method that changes the contract's state
+  async callMethod({ contractId = this.contractId, method, args = {}, gas = 3000000000000, deposit = 0 }) {
+    const { accountId } = this.walletSelector.store.getState().accounts[0];
 
-  // Sign a transaction with the "FunctionCall" action
-  return await wallet.signAndSendTransaction({
-    signerId: accountId,
-    receiverId: contractId,
-    actions: [
-      {
-        type: "FunctionCall",
-        params: {
-          methodName: method,
-          args,
-          gas,
-          deposit,
+    // Sign a transaction with the "FunctionCall" action
+    return await this.wallet.signAndSendTransaction({
+      signerId: accountId,
+      receiverId: contractId,
+      actions: [
+        {
+          type: "FunctionCall",
+          params: {
+            methodName: method,
+            args,
+            gas,
+            deposit,
+          },
         },
-      },
-    ],
-  })
-}
+      ],
+    })
+  }
 
+  // Get transaction result from the network
+  async getTransactionResult(txhash) {
+    const { network } = this.walletSelector.options;
+    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
 
-export async function getTransactionResult(txhash) {
-  const { network } = window.walletSelector.options;
-  const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
-
-  // Retrieve transaction result from the network
-  const transaction = await provider.txStatus(txhash, 'unnused')
-  return providers.getTransactionLastResult(transaction)
+    // Retrieve transaction result from the network
+    const transaction = await provider.txStatus(txhash, 'unnused')
+    return providers.getTransactionLastResult(transaction)
+  }
 }

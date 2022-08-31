@@ -1,9 +1,15 @@
-import * as Wallet from './near-wallet'
+export class Contract{
+  wallet;
 
-export async function getGreeting(){
-  return await Wallet.viewMethod({method: "get_greeting"});
-}
+  constructor({wallet}){
+    this.wallet = wallet
+  }
 
-export async function setGreeting(message){
-  return await Wallet.callMethod({method: "set_greeting", args:{message}})
+  async getGreeting(){
+    return await wallet.viewMethod({method: "get_greeting"});
+  }
+  
+  async setGreeting(message){
+    return await wallet.callMethod({method: "set_greeting", args:{message}})
+  }
 }

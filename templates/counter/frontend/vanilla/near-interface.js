@@ -1,17 +1,23 @@
-import * as Wallet from './near-wallet'
+export class Contract{
+  wallet;
 
-export async function counterIncrement(){
-  return await Wallet.callMethod({method: "increment"})
-}
+  constructor({wallet}){
+    this.wallet = wallet
+  }
 
-export async function counterDecrement(){
-  return await Wallet.callMethod({method: "decrement"})
-}
+  async counterIncrement(){
+    return await this.wallet.callMethod({method: "increment"})
+  }
 
-export async function counterReset(){
-  return await Wallet.callMethod({method: "reset"})
-}
+  async counterDecrement(){
+    return await this.wallet.callMethod({method: "decrement"})
+  }
 
-export async function getCounter(){
-  return await Wallet.viewMethod({method: "get_num"});
+  async counterReset(){
+    return await this.wallet.callMethod({method: "reset"})
+  }
+
+  async getCounter(){
+    return await this.wallet.viewMethod({method: "get_num"});
+  }
 }
