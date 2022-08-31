@@ -27,7 +27,6 @@ export async function getUserArgs(): Promise<UserConfig> {
     .option('--tests <tests>')
     .option('--install');
 
-
   program.parse();
 
   const options = program.opts();
@@ -64,7 +63,7 @@ export function validateUserArgs(args: UserConfig): 'error' | 'ok' | 'none' {
 type Choices<T> = {title: string, value: T}[];
 const exampleChoices: Choices<Example> = [
   {title: 'Hello NEAR', value: 'hello-near'},
-  {title: 'Count on NEAR', value: 'count-near'},
+  {title: 'Count on NEAR', value: 'counter'},
   {title: 'Guest Book', value: 'guest-book'},
   {title: 'Donation', value: 'donation'},
   {title: 'Cross-Contract Call', value: 'xcc'},
@@ -72,7 +71,6 @@ const exampleChoices: Choices<Example> = [
 const contractChoices: Choices<Contract> = [
   {title: 'TypeScript', value: 'js'},
   {title: 'Rust', value: 'rust'},
-  {title: 'AssemblyScript', value: 'as'},
 ];
 const testsChoices: Choices<TestingFramework> = [
   {title: 'Rust Sandbox Tests', value: 'rust'},

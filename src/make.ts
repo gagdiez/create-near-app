@@ -58,13 +58,9 @@ export async function createFiles({example, contract, frontend, tests, projectPa
   const srcExampleTest = path.resolve(`${rootDir}/${example}/integration-tests/${tests}-tests`);
   nunjucks.configure(srcExampleTest, { autoescape: false });
 
-  // handle js init
-  let js_init = "";
-  if(contract == 'js'){
-    js_init = tests == 'js'? "await contract.call(contract, 'init', {});" : 'contract.call(&worker, "init").transact().await?;';
-  }
+  // handle template
   const tst_file = tests == 'js'? 'main.ava.ts' : 'tests.rs';
-  const test_rendered = nunjucks.render(tst_file, { js_template_init: js_init });
+  const test_rendered = nunjucks.render(tst_file, { isJS: contract == "js" });
   await fs.writeFileSync(`${projectPath}/integration-tests/src/${tst_file}`, test_rendered)
 
   // shared files

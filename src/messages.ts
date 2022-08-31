@@ -43,7 +43,7 @@ ${contract === 'rust' ? chalk`🦀 If you are new to Rust please visit {bold {gr
 
 export const argsError = () => show(chalk`{red Arguments error}
 Run {blue npx create-near-app} without arguments, or use:
-npx create-near-app <projectName> --example hello_near|count_near|guest-book|donation|xcc --contract rust|js|assemblyscript --frontend react|vanilla|none --tests js|rust`);
+npx create-near-app <projectName> --example hello_near|counter|guest-book|donation|xcc --contract rust|js --frontend react|vanilla|none --tests js|rust`);
 
 export const unsupportedNodeVersion = (supported: string) => show(chalk`{red We support node.js version ${supported} or later}`);
 

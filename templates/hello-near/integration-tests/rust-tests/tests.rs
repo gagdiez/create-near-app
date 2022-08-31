@@ -12,8 +12,9 @@ async fn main() -> anyhow::Result<()> {
     let worker = workspaces::sandbox().await?;
     let wasm = std::fs::read(wasm_filepath)?;
     let contract = worker.dev_deploy(&wasm).await?;
-    {{js_template_init}}
-
+{% if isJS %}
+    contract.call(&worker, "init").transact().await?;
+{% endif %}
     // create accounts
     let account = worker.dev_create_account().await?;
     let alice = account

@@ -46,7 +46,6 @@ const buildScript = (hasFrontend: boolean): Entries => hasFrontend ? {
 
 const buildContractScript = (contract: Contract): Entries => {
   switch (contract) {
-    case 'as':
     case 'js':
       return {
         'build:contract': 'cd contract && npm run build',
@@ -60,7 +59,6 @@ const buildContractScript = (contract: Contract): Entries => {
 
 const deployScript = (contract: Contract): Entries => {
   switch (contract) {
-    case 'as':
     case 'js':
       return {
         'deploy': 'cd contract && npm run deploy',
@@ -75,7 +73,6 @@ const deployScript = (contract: Contract): Entries => {
 const unitTestScripts = (contract: Contract): Entries => {
   switch (contract) {
     case 'js':
-    case 'as':
       return {'test:unit': 'cd contract && npm test'};
     case 'rust':
       return {'test:unit': 'cd contract && cargo test'};
@@ -85,7 +82,6 @@ const unitTestScripts = (contract: Contract): Entries => {
 const integrationTestScripts = (contract: Contract, tests: TestingFramework): Entries => {
   let wasm_path: String = "";
   switch (contract) {
-    case 'as': wasm_path = `contract/build/release/contract.wasm`; break;
     case 'js': wasm_path = `contract/build/contract.wasm`; break;
     case 'rust': wasm_path = `contract/target/wasm32-unknown-unknown/release/contract.wasm`; break;
   }
@@ -107,8 +103,6 @@ const npmInstallScript = (contract: Contract, hasFrontend: boolean, tests: Testi
 
   let contract_install = ''
   switch (contract) {
-    case 'as':
-      contract_install = 'cd contract && npm install --ignore-scripts'; break;
     case 'js':
       contract_install = 'cd contract && npm install'; break;
     case 'rust':
