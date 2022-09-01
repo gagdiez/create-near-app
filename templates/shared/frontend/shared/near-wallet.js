@@ -12,6 +12,9 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupLedger } from "@near-wallet-selector/ledger";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 
+const THIRTY_TGAS = "30000000000000";
+const NO_DEPOSIT = "0"
+
 // Wallet that simplifies using the wallet selector
 export class Wallet {
   walletSelector;
@@ -47,7 +50,6 @@ export class Wallet {
   // Sign-in method
   signIn() {
     const description = "Please select a wallet to sign in."
-    console.log(this.walletSelector)
     const modal = setupModal(this.walletSelector, { contractId: this.contractId, description })
     modal.show()
   }
@@ -75,7 +77,7 @@ export class Wallet {
   }
 
   // Call a method that changes the contract's state
-  async callMethod({ contractId = this.contractId, method, args = {}, gas = 3000000000000, deposit = 0 }) {
+  async callMethod({ contractId = this.contractId, method, args = {}, gas = THIRTY_TGAS, deposit = NO_DEPOSIT }) {
     const { accountId } = this.walletSelector.store.getState().accounts[0];
 
     // Sign a transaction with the "FunctionCall" action

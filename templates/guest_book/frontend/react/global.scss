@@ -3,12 +3,12 @@
 }
 
 html {
-  --bg: #fff;
+  --bg: #f4f4f4;
   --fg: #25282A;
   --gray: #888;
   --royal: #0072CE;
   --blue: #6AD1E3;
-  --primary: #D1CCBD;
+  --primary: #93b0df;
   --secondary: var(--royal);
   --tertiary: #FF585D;
 
@@ -108,6 +108,8 @@ button {
   &:hover, &:focus {
     top: -1px;
   }
+  background: var(--primary);
+
   &:active {
     background: var(--secondary);
     border-color: var(--secondary);
@@ -119,4 +121,8 @@ button {
   border-left: 0.25em solid var(--secondary);
   padding-left: 0.25em;
   margin-left: -0.5em;
+}
+
+table button{
+  margin-left: 1rem;
 }

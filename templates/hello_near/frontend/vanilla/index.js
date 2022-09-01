@@ -6,7 +6,7 @@ import { Wallet } from './near-wallet';
 window.wallet = new Wallet({contractId: process.env.CONTRACT_NAME});
 window.contract = new Contract({wallet: window.wallet})
 
-//  Setup on page load
+// Setup on page load
 window.onload = async () => {
   let isSignedIn = await wallet.startUp()
 
