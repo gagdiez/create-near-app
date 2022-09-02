@@ -57,13 +57,13 @@ mod tests {
 
   #[test]
   fn initializes() {
-      let contract = Contract::new(BENEFICIARY.parse().unwrap());
+      let contract = Contract::init(BENEFICIARY.parse().unwrap());
       assert_eq!(contract.beneficiary, BENEFICIARY.parse().unwrap())
   }
 
   #[test]
   fn donate() {
-      let mut contract = Contract::new(BENEFICIARY.parse().unwrap());
+      let mut contract = Contract::init(BENEFICIARY.parse().unwrap());
 
       // Make a donation
       set_context("donor_a", 1*NEAR);
@@ -89,7 +89,7 @@ mod tests {
       // Check the donation was recorded correctly
       assert_eq!(first_donation.total_amount.0, 1*NEAR * 2);
 
-      assert_eq!(contract.total_donations(), 2);
+      assert_eq!(contract.number_of_donors(), 2);
   }
 
   // Auxiliar fn: create a mock context
