@@ -14,7 +14,7 @@ pub struct Contract {
 impl Contract {
   #[init]
   #[private] // Public - but only callable by env::current_account_id()
-  pub fn new(hello_account: AccountId) -> Self {
+  pub fn init(hello_account: AccountId) -> Self {
     assert!(!env::state_exists(), "Already initialized");
     Self {
       hello_account,
@@ -65,11 +65,11 @@ impl Contract {
   pub fn change_greeting_callback(&mut self, #[callback_result] call_result: Result<(), PromiseError>) -> bool {
     // Return whether or not the promise succeeded using the method outlined in external.rs
     if call_result.is_err() {
-      env::log_str("set_greeting was successful!");
-      return true;
-    } else {
       env::log_str("set_greeting failed...");
       return false;
+    } else {
+      env::log_str("set_greeting was successful!");
+      return true;
     }
   }
 }
@@ -84,7 +84,7 @@ mod tests {
     #[test]
     fn initializes() {
         let beneficiary: AccountId = HELLO_NEAR.parse().unwrap();
-        let contract = Contract::new(beneficiary);
+        let contract = Contract::init(beneficiary);
         assert_eq!(contract.hello_account, HELLO_NEAR.parse().unwrap())
     }
 }

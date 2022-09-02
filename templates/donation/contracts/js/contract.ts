@@ -1,19 +1,16 @@
-import { NearContract, NearBindgen, near, call, view, UnorderedMap } from 'near-sdk-js'
+import { NearBindgen, near, call, view, initialize, UnorderedMap } from 'near-sdk-js'
 import { assert, make_private } from './utils'
 import { Donation, STORAGE_COST } from './model'
 
-@NearBindgen
-class DonationContract extends NearContract {
-  beneficiary: string;
-  donations: UnorderedMap;
+@NearBindgen({})
+class DonationContract {
+  beneficiary: string = "v1.faucet.nonofficial.testnet";
+  donations: UnorderedMap = new UnorderedMap('map-uid-1');
 
-  constructor({beneficiary}:{beneficiary:string}) {
-    super()
-    this.beneficiary = beneficiary;
-    this.donations = new UnorderedMap('map-uid-1');
+  @initialize
+  init({ beneficiary }:{beneficiary: string}) {
+    this.beneficiary = beneficiary
   }
-
-  default() { return new DonationContract({beneficiary: "v1.faucet.nonofficial.testnet"}) }
 
   @call
   donate() {
@@ -55,12 +52,12 @@ class DonationContract extends NearContract {
   get_beneficiary(){ return this.beneficiary }
 
   @view
-  number_of_donors() { return this.donations.len() }
+  number_of_donors() { return this.donations.length }
 
   @view
   get_donations({from_index = 0, limit = 50}: {from_index:number, limit:number}): Donation[] {
     let ret:Donation[] = []
-    let end = Math.min(limit, this.donations.len())
+    let end = Math.min(limit, this.donations.length)
     for(let i=from_index; i<end; i++){
       const account_id: string = this.donations.keys.get(i) as string
       const donation: Donation = this.get_donation_for_account({account_id})

@@ -8,7 +8,7 @@ export class Contract{
   }
 
   async getBeneficiary() {
-    return await wallet.viewMethod({ method: "beneficiary" })
+    return await wallet.viewMethod({ method: "get_beneficiary" })
   }
   
   async latestDonations() {

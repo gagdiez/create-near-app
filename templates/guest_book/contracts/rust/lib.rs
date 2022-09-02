@@ -1,46 +1,55 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{log, near_bindgen};
+use near_sdk::serde::Serialize;
+use near_sdk::{env, AccountId, Balance, near_bindgen};
 use near_sdk::collections::{Vector};
+use near_sdk::json_types::{U128};
+
+const POINT_ONE: Balance = 10000000000000000000000;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct PostedMessage {
-  pub premium: Bool, 
+  pub premium: bool, 
   pub sender: AccountId,
-  pub test: String
+  pub text: String
 }
 
 #[near_bindgen]
-#[derive(Default, BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize)]
 pub struct GuestBook {
-    messages: Vector<PostedMessage>,
+  messages: Vector<PostedMessage>,
+}
+
+impl Default for GuestBook{
+  fn default() -> Self {
+    Self{messages: Vector::new(b"m")}
+  }
 }
 
 #[near_bindgen]
 impl GuestBook {
-    /// Public method: Returns the counter value.
-    pub fn add_message(&self, text: String) {
-        return self.val;
-    }
 
-    /// Public method: Increment the counter.
-    pub fn increment(&mut self) {
-        self.val += 1;
-        log!("Increased number to {}", self.val);
-    }
+  // Public - Adds a new message.
+  #[payable]
+  pub fn add_message(&mut self, text: String) {
+    // If the user attaches more than 0.01N the message is premium
+    let premium = env::attached_deposit() >= POINT_ONE;
+    let sender = env::predecessor_account_id();
 
-    /// Public method: Decrement the counter.
-    pub fn decrement(&mut self) {
-        self.val -= 1;
-        log!("Decreased number to {}", self.val);
-    }
+    let message = PostedMessage{premium, sender, text};
+    self.messages.push(&message);
+  }
 
-    /// Public method - Reset to zero.
-    pub fn reset(&mut self) {
-        self.val = 0;
-        log!("Reset counter to zero");
-    }
+  // Returns an array of messages.
+  pub fn get_messages(&self, from_index:Option<U128>, limit:Option<u64>) -> Vec<PostedMessage>{
+    let from = u128::from(from_index.unwrap_or(U128(0)));
+
+    self.messages.iter()
+    .skip(from as usize)
+    .take(limit.unwrap_or(10) as usize)
+    .collect()
+  }
 }
 
 /*
@@ -52,42 +61,30 @@ impl GuestBook {
 // use the attribute below for unit tests
 #[cfg(test)]
 mod tests {
-    use super::*;
+  use super::*;
 
-    #[test]
-    fn increment() {
-        // instantiate a contract variable with the counter at zero
-        let mut contract = Counter { val: 0 };
-        contract.increment();
-        assert_eq!(1, contract.get_num());
-    }
+  #[test]
+  fn add_message() {
+    let mut contract = GuestBook::default();
+    contract.add_message("A message".to_string());
 
-    #[test]
-    fn decrement() {
-        let mut contract = Counter { val: 0 };
-        contract.decrement();
-        assert_eq!(-1, contract.get_num());
-    }
+    let posted_message = &contract.get_messages(None, None)[0];
+    assert_eq!(posted_message.premium, false);
+    assert_eq!(posted_message.text, "A message".to_string());
+  }
 
-    #[test]
-    fn increment_and_reset() {
-        let mut contract = Counter { val: 0 };
-        contract.increment();
-        contract.reset();
-        assert_eq!(0, contract.get_num());
-    }
+  #[test]
+  fn iters_messages() {
+    let mut contract = GuestBook::default();
+    contract.add_message("1st message".to_string());
+    contract.add_message("2nd message".to_string());
+    contract.add_message("3rd message".to_string());
+    
+    let messages = &contract.get_messages(None, None);
+    assert!(messages.len() == 3);
 
-    #[test]
-    #[should_panic]
-    fn panics_on_overflow() {
-        let mut contract = Counter { val: 127 };
-        contract.increment();
-    }
-
-    #[test]
-    #[should_panic]
-    fn panics_on_underflow() {
-        let mut contract = Counter { val: -128 };
-        contract.decrement();
-    }
+    let last_message = &contract.get_messages(Some(U128::from(1)), Some(2))[1];
+    assert_eq!(last_message.premium, false);
+    assert_eq!(last_message.text, "3rd message".to_string());
+  }
 }

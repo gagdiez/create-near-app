@@ -24,7 +24,7 @@ impl Default for Contract {
 impl Contract {
   #[init]
   #[private] // Public - but only callable by env::current_account_id()
-  pub fn new(beneficiary: AccountId) -> Self {
+  pub fn init(beneficiary: AccountId) -> Self {
     assert!(!env::state_exists(), "Already initialized");
     Self {
       beneficiary,
@@ -33,7 +33,7 @@ impl Contract {
   }
 
   // Public - beneficiary getter
-  pub fn beneficiary(&self) -> AccountId {
+  pub fn get_beneficiary(&self) -> AccountId {
     self.beneficiary.clone()
   }
 

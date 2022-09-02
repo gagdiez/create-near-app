@@ -1,16 +1,9 @@
-import { NearContract, NearBindgen, near, call, view } from 'near-sdk-js'
+import { NearBindgen, near, call, view } from 'near-sdk-js'
 import { POINT_ONE, PostedMessage } from './model'
 
-@NearBindgen
-class GuestBook extends NearContract {
-  messages: PostedMessage[];
-
-  constructor() {
-    super()
-    this.messages = [];
-  }
-
-  default() { return new GuestBook() }
+@NearBindgen({})
+class GuestBook {
+  messages: PostedMessage[] = [];
 
   @call
   // Public - Adds a new message.
@@ -24,9 +17,8 @@ class GuestBook extends NearContract {
   }
   
   @view
-  // Returns an array of last N messages.
-  get_messages({ fromIndex = 0, limit = 10 }: { fromIndex: number, limit: number }): PostedMessage[] {
-    // Paginate the messages using the fromIndex and limit parameters
-    return this.messages.slice(fromIndex, fromIndex + limit);
+  // Returns an array of messages.
+  get_messages({ from_index = 0, limit = 10 }: { from_index: number, limit: number }): PostedMessage[] {
+    return this.messages.slice(from_index, from_index + limit);
   }
 }

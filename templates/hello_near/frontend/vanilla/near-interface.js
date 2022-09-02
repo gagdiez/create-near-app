@@ -9,7 +9,7 @@ export class Contract{
     return await wallet.viewMethod({method: "get_greeting"});
   }
   
-  async setGreeting(message){
-    return await wallet.callMethod({method: "set_greeting", args:{message}})
+  async setGreeting(greeting){
+    return await wallet.callMethod({method: "set_greeting", args:{greeting}})
   }
 }

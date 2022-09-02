@@ -62,9 +62,9 @@ export function validateUserArgs(args: UserConfig): 'error' | 'ok' | 'none' {
 
 type Choices<T> = {title: string, value: T}[];
 const exampleChoices: Choices<Example> = [
-  {title: 'Hello NEAR', value: 'hello-near'},
+  {title: 'Hello NEAR', value: 'hello_near'},
   {title: 'Count on NEAR', value: 'counter'},
-  {title: 'Guest Book', value: 'guest-book'},
+  {title: 'Guest Book', value: 'guest_book'},
   {title: 'Donation', value: 'donation'},
   {title: 'Cross-Contract Call', value: 'xcc'},
 ];
@@ -77,7 +77,7 @@ const testsChoices: Choices<TestingFramework> = [
   {title: 'TypeScript Sandbox Tests', value: 'js'},
 ];
 const frontendChoices: Choices<Frontend> = [
-  {title: 'React.js', value: 'react'},
+  {title: 'React.js', value: 'react',},
   {title: 'Vanilla JavaScript', value: 'vanilla'},
   {title: 'No frontend', value: 'none'},
 ];
@@ -101,7 +101,7 @@ const userPrompts: PromptObject[] = [
     choices: testsChoices,
   },
   {
-    type: 'select',
+    type: prev => prev === 'cross-contract' ?  null : 'select',
     name: 'frontend',
     message: 'Select a template for your frontend',
     choices: frontendChoices,

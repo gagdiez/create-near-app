@@ -20,13 +20,10 @@ test.beforeEach(async (t) => {
   const contract = await root.createSubAccount("contract", {
     initialBalance: NEAR.parse("30 N").toJSON(),
   });
-  
+
   // Get wasm file path from package.json test script in folder above
   await contract.deploy(process.argv[2]);
-{% if isJS %}
-  // JS contract needs to be initialized
-  await contract.call(contract, "init", {})
-{% endif %}
+
   // Save state for test runs, it is unique for each test
   t.context.worker = worker;
   t.context.accounts = { root, contract, alice };
@@ -44,11 +41,7 @@ test("send one message and retrieve it", async (t) => {
   await root.call(contract, "add_message", { text: "aloha" });
   const msgs = await contract.view("get_messages");
   const expectedMessagesResult = [
-    {
-      premium: false,
-      sender: root.accountId,
-      text: "aloha",
-    },
+    { premium: false, sender: root.accountId, text: "aloha" },
   ];
   t.deepEqual(msgs, expectedMessagesResult);
 });
@@ -56,15 +49,11 @@ test("send one message and retrieve it", async (t) => {
 test("send two messages and expect two total", async (t) => {
   const { root, contract, alice } = t.context.accounts;
   await root.call(contract, "add_message", { text: "aloha" });
-  await alice.call(contract, "add_message", { text: "hola" });
+  await alice.call(contract, "add_message", { text: "hola" }, { attachedDeposit: NEAR.parse('1') });
   const msgs = await contract.view("get_messages");
   const expected = [
-    {
-      premium: false,
-      sender: root.accountId,
-      text: "aloha",
-    },
-    { premium: false, sender: alice.accountId, text: "hola" },
+    { premium: false, sender: root.accountId, text: "aloha" },
+    { premium: true, sender: alice.accountId, text: "hola" },
   ];
   t.deepEqual(msgs, expected);
 });

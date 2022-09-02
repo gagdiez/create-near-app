@@ -3,25 +3,20 @@
 The smart contract exposes two methods to enable storing and retrieving a greeting in the NEAR network.
 
 ```ts
-@NearBindgen
-class HelloNear extends NearContract {
-  greeting: string;
+@NearBindgen({})
+class HelloNear {
+  greeting: string = "Hello";
 
-  constructor({greeting}:{greeting: string}) {
-    super();
-    this.greeting = greeting;
-  }
-
-  default(){ return new HelloNear({greeting: 'Hello'}) }
-
-  @call
-  set_greeting({ greeting }: { greeting: string }): void {
-    this.greeting = greeting;
-  }
-
-  @view
+  @view // This method is read-only and can be called for free
   get_greeting(): string {
     return this.greeting;
+  }
+
+  @call // This method changes the state, for which it cost gas
+  set_greeting({ greeting }: { greeting: string }): void {
+    // Record a log permanently to the blockchain!
+    near.log(`Saving greeting ${greeting}`);
+    this.greeting = greeting;
   }
 }
 ```

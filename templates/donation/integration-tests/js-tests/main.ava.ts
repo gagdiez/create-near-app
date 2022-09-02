@@ -33,11 +33,8 @@ test.beforeEach(async (t) => {
   await contract.deploy(process.argv[2]);
 
   // Initialize beneficiary
-{% if isJS %}
   await contract.call(contract, "init", {beneficiary: beneficiary.accountId})
-{% else %}
-  await contract.call(contract, "new", {beneficiary: beneficiary.accountId})
-{% endif %}
+
   // Save state for test runs, it is unique for each test
   t.context.worker = worker;
   t.context.accounts = { root, contract, beneficiary, alice, bob };

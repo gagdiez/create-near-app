@@ -17,6 +17,7 @@ Our Donation example enables to forward money to an account while keeping track 
 2. How to divide a project into multiple modules.
 3. How to handle the storage costs.
 4. How to handle transaction results.
+5. How to use a `Map`.
 
 <br />
 

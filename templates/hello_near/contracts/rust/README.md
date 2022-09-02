@@ -8,12 +8,12 @@ const DEFAULT_MESSAGE: &str = "Hello";
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
-    message: String,
+    greeting: String,
 }
 
 impl Default for Contract {
     fn default() -> Self {
-        Self{message: DEFAULT_MESSAGE.to_string()}
+        Self{greeting: DEFAULT_MESSAGE.to_string()}
     }
 }
 
@@ -21,14 +21,14 @@ impl Default for Contract {
 impl Contract {
     // Public: Returns the stored greeting, defaulting to 'Hello'
     pub fn get_greeting(&self) -> String {
-        return self.message.clone();
+        return self.greeting.clone();
     }
 
     // Public: Takes a greeting, such as 'howdy', and records it
-    pub fn set_greeting(&mut self, message: String) {
+    pub fn set_greeting(&mut self, greeting: String) {
         // Record a log permanently to the blockchain!
-        log!("Saving greeting {}", message);
-        self.message = message;
+        log!("Saving greeting {}", greeting);
+        self.greeting = greeting;
     }
 }
 ```
@@ -46,7 +46,7 @@ impl Contract {
 You can automatically compile and deploy the contract in the NEAR testnet by running:
 
 ```bash
-npm run deploy
+./deploy.sh
 ```
 
 Once finished, check the `neardev/dev-account` file to find the address in which the contract was deployed:

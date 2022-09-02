@@ -21,10 +21,7 @@ test.beforeEach(async (t) => {
 
   // Get wasm file path from package.json test script in folder above
   await contract.deploy(process.argv[2]);
-{% if isJS %}
-  // JS contract needs to be initialized
-  await contract.call(contract, "init", {})
-{% endif %}  
+
   // Save state for test runs, it is unique for each test
   t.context.worker = worker;
   t.context.accounts = { contract, alice };

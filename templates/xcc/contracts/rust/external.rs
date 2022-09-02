@@ -14,7 +14,6 @@ trait Callbacks {
 // Validator interface, for cross-contract calls
 #[ext_contract(hello_near)]
 trait HelloNear {
-  #[payable]
-  fn get_greeting(&mut self) -> String;
-  fn set_greeting(&self, message: String);
+  fn get_greeting(&self) -> String;
+  fn set_greeting(&self, greeting: String);
 }

@@ -35,7 +35,7 @@ export async function createFiles({example, contract, frontend, tests, projectPa
     const srcExampleFrontend = `${rootDir}/${example}/frontend/${frontend}`;
     await copyDir(srcExampleFrontend, `${projectPath}/frontend`, {verbose, skip: skip.map(f => path.join(srcExampleFrontend, f))});
   
-    fs.copyFileSync(`${rootDir}/shared/frontend/start.sh`, `${projectPath}/frontend/start.sh`)
+    await copyDir(`${rootDir}/shared/frontend/shared`, `${projectPath}/frontend/`, {verbose, skip: []})
   }
 
   // copy contract files
@@ -56,12 +56,7 @@ export async function createFiles({example, contract, frontend, tests, projectPa
   await copyDir(srcSharedTest, `${projectPath}/integration-tests/`, {verbose, skip: skip.map(f => path.join(srcSharedTest, f))});
 
   const srcExampleTest = path.resolve(`${rootDir}/${example}/integration-tests/${tests}-tests`);
-  nunjucks.configure(srcExampleTest, { autoescape: false });
-
-  // handle template
-  const tst_file = tests == 'js'? 'main.ava.ts' : 'tests.rs';
-  const test_rendered = nunjucks.render(tst_file, { isJS: contract == "js" });
-  await fs.writeFileSync(`${projectPath}/integration-tests/src/${tst_file}`, test_rendered)
+  await copyDir(srcExampleTest, `${projectPath}/integration-tests/src`, {verbose, skip: skip.map(f => path.join(srcSharedTest, f))});
 
   // shared files
   const srcSharedFiles = `${rootDir}/shared/shared`;

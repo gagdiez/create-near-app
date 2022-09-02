@@ -12,9 +12,7 @@ async fn main() -> anyhow::Result<()> {
     let worker = workspaces::sandbox().await?;
     let wasm = std::fs::read(wasm_filepath)?;
     let contract = worker.dev_deploy(&wasm).await?;
-{% if isJS %}
-    contract.call(&worker, "init").transact().await?;
-{% endif %}
+
     // create accounts
     let account = worker.dev_create_account().await?;
     let alice = account
@@ -35,15 +33,15 @@ async fn test_default_message(
     contract: &Contract,
     worker: &Worker<Sandbox>,
 ) -> anyhow::Result<()> {
-    let message: String = user
+    let greeting: String = user
         .call(&worker, contract.id(), "get_greeting")
         .args_json(json!({}))?
         .transact()
         .await?
         .json()?;
 
-    assert_eq!(message, "Hello".to_string());
-    println!("      Passed ✅ gets default message");
+    assert_eq!(greeting, "Hello".to_string());
+    println!("      Passed ✅ gets default greeting");
     Ok(())
 }
 
@@ -53,18 +51,18 @@ async fn test_changes_message(
     worker: &Worker<Sandbox>,
 ) -> anyhow::Result<()> {
     user.call(&worker, contract.id(), "set_greeting")
-        .args_json(json!({"message": "Howdy"}))?
+        .args_json(json!({"greeting": "Howdy"}))?
         .transact()
         .await?;
 
-    let message: String = user
+    let greeting: String = user
         .call(&worker, contract.id(), "get_greeting")
         .args_json(json!({}))?
         .transact()
         .await?
         .json()?;
 
-    assert_eq!(message, "Howdy".to_string());
-    println!("      Passed ✅ changes message");
+    assert_eq!(greeting, "Howdy".to_string());
+    println!("      Passed ✅ changes greeting");
     Ok(())
 }

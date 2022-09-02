@@ -1,49 +1,35 @@
 # Donation Contract
 
-The smart contract exposes multiple methods to handle donating money to a `beneficiary` set on initialization.
+The smart contract exposes methods to handle donating $NEAR to a `beneficiary`.
 
 ```ts
-@NearBindgen
-class DonationContract extends NearContract {
-  beneficiary: string;
-  donations: UnorderedMap;
+@call
+donate() {
+  // Get who is calling the method and how much $NEAR they attached
+  let donor = near.predecessorAccountId(); 
+  let donationAmount: bigint = near.attachedDeposit() as bigint;
 
-  constructor({beneficiary}:{beneficiary:string}) {
-    super()
-    this.beneficiary = beneficiary;
-    this.donations = new UnorderedMap('map-uid-1');
+  let donatedSoFar = this.donations.get(donor) === null? BigInt(0) : BigInt(this.donations.get(donor) as string)
+  let toTransfer = donationAmount;
+
+  // This is the user's first donation, lets register it, which increases storage
+  if(donatedSoFar == BigInt(0)) {
+    assert(donationAmount > STORAGE_COST, `Attach at least ${STORAGE_COST} yoctoNEAR`);
+
+    // Subtract the storage cost to the amount to transfer
+    toTransfer -= STORAGE_COST
   }
 
-  default() { return new DonationContract({beneficiary: "v1.faucet.nonofficial.testnet"}) }
+  // Persist in storage the amount donated so far
+  donatedSoFar += donationAmount
+  this.donations.set(donor, donatedSoFar.toString())
 
-  @call
-  donate() {
-    // Get who is calling the method and how much $NEAR they attached
-    let donor = near.predecessorAccountId(); 
-    let donationAmount: bigint = near.attachedDeposit() as bigint;
+  // Send the money to the beneficiary
+  const promise = near.promiseBatchCreate(this.beneficiary)
+  near.promiseBatchActionTransfer(promise, toTransfer)
 
-    let donatedSoFar = this.donations.get(donor) === null? BigInt(0) : BigInt(this.donations.get(donor) as string)
-    let toTransfer = donationAmount;
- 
-    // This is the user's first donation, lets register it, which increases storage
-    if(donatedSoFar == BigInt(0)) {
-      assert(donationAmount > STORAGE_COST, `Attach at least ${STORAGE_COST} yoctoNEAR`);
-
-      // Subtract the storage cost to the amount to transfer
-      toTransfer -= STORAGE_COST
-    }
-
-    // Persist in storage the amount donated so far
-    donatedSoFar += donationAmount
-    this.donations.set(donor, donatedSoFar.toString())
-
-    // Send the money to the beneficiary
-    const promise = near.promiseBatchCreate(this.beneficiary)
-    near.promiseBatchActionTransfer(promise, toTransfer)
-
-    // Return the total amount donated so far
-    return donatedSoFar.toString()
-  }
+  // Return the total amount donated so far
+  return donatedSoFar.toString()
 }
 ```
 

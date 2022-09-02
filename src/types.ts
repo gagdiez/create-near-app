@@ -1,5 +1,5 @@
-export type Example = 'hello-near' | 'counter' | 'guest-book' | 'donation' | 'xcc';
-export const EXAMPLES: Example[] = ['hello-near', 'counter', 'guest-book', 'donation', 'xcc'];
+export type Example = 'hello_near' | 'counter' | 'guest_book' | 'donation' | 'xcc';
+export const EXAMPLES: Example[] = ['hello_near', 'counter', 'guest_book', 'donation', 'xcc'];
 export type Contract = 'js' | 'rust';
 export const CONTRACTS: Contract[] = ['js', 'rust'];
 export type Frontend = 'react' | 'vanilla' | 'none';

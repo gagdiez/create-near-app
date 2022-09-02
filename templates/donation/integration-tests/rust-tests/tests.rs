@@ -18,19 +18,13 @@ async fn main() -> anyhow::Result<()> {
     let bob = worker.dev_create_account().await?;
 
     let beneficiary = worker.dev_create_account().await?;
-{% if isJS %}
+
     // init contract
     contract.call(&worker, "init")
     .transact()
     .args_json(json!({"beneficiary": beneficiary.id()}))?
     .await?;
-{% else %}
-    // init contract
-    contract.call(&worker, "new")
-    .transact()
-    .args_json(json!({"beneficiary": beneficiary.id()}))?
-    .await?;
-{% endif %}
+
     // begin tests  
     test_donation(&alice, &bob, &beneficiary, &contract, &worker).await?;
     test_records(&alice, &contract, &worker).await?;
