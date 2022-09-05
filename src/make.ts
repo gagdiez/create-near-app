@@ -65,9 +65,10 @@ export async function createFiles({example, contract, frontend, tests, projectPa
   await renameFile(`${projectPath}/template.gitignore`, `${projectPath}/.gitignore`);
 
   // copy readme
-  let color = contract == "rust"? "red":"yellow";
+  const color = contract == "rust"? "red":"yellow";
+  const gitUrl = `https://github.com/near-examples/${example.replaceAll('_', '-')}-${contract}`
   nunjucks.configure(`${rootDir}/${example}/`, { autoescape: false });
-  const readme = nunjucks.render("README.md", { color: color, language: contract, example});
+  const readme = nunjucks.render("README.md", { color: color, language: contract, example , github: gitUrl});
   await fs.writeFileSync(`${projectPath}/README.md`, readme)
 }
 
