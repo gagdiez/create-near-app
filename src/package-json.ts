@@ -35,7 +35,9 @@ function basePackage({contract, frontend, tests, projectName}: PackageBuildParam
 
 const startScript = (hasFrontend: boolean): Entries => hasFrontend ? {
   'start': 'cd frontend && npm run start'
-} : {};
+} : {
+  'start': 'echo no frontend'
+};
 
 const buildScript = (hasFrontend: boolean): Entries => hasFrontend ? {
   'build': 'npm run build:contract && npm run build:web',
