@@ -88,7 +88,7 @@ cat ./neardev/dev-account
 `Call` methods can only be invoked using a NEAR account, since the account needs to pay GAS for the transaction.
 
 ```bash
-# Use near-cli to ask the contract to query te greeting
+# Use near-cli to ask the contract to query the greeting
 near call <dev-account> query_greeting --accountId <dev-account>
 ```
 
@@ -100,7 +100,7 @@ near call <dev-account> query_greeting --accountId <dev-account>
 `Call` methods can only be invoked using a NEAR account, since the account needs to pay GAS for the transaction.
 
 ```bash
-# Use near-cli to set increment the counter
+# Use near-cli to change the greeting
 near call <dev-account> change_greeting '{"new_greeting":"XCC Hi"}' --accountId <dev-account>
 ```
 
