@@ -9,7 +9,7 @@ import { Wallet } from './near-wallet';
 
 // create the Wallet and the Contract
 const contractId = process.env.CONTRACT_NAME
-const wallet = new Wallet({contractId: contractId});
+const wallet = new Wallet({contractId: contractId, createAccessKey: true});
 const contract = new Contract({wallet: wallet})
 
 // Setup on page load
