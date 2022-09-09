@@ -1,20 +1,23 @@
-import {utils} from 'near-api-js';
+/* Talking with a contract often involves transforming data, we recommend you to encapsulate that logic into a class */
 
-export class Contract{
-  wallet;
+import { utils } from 'near-api-js';
 
-  constructor({wallet}){
-    this.wallet = wallet
+export class GuestBook {
+
+  constructor({ contractId, walletToUse }) {
+    this.contractId = contractId;
+    this.wallet = walletToUse
   }
 
-  async getMessages(){
-    const messages = await this.wallet.viewMethod({method: "get_messages"})
+  async getMessages() {
+    const messages = await this.wallet.viewMethod({ contractId: this.contractId, method: "get_messages" })
     console.log(messages)
     return messages
   }
 
-  async addMessage(message, donation){
+  async addMessage(message, donation) {
     const deposit = utils.format.parseNearAmount(donation);
-    return await this.wallet.callMethod({method: "add_message", args: {text: message}, deposit});
+    return await this.wallet.callMethod({ contractId: this.contractId, method: "add_message", args: { text: message }, deposit });
   }
+
 }

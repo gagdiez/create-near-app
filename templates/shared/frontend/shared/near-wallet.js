@@ -1,3 +1,5 @@
+/* A helper file that simplifies using the wallet selector */
+
 // near api js
 import { providers } from 'near-api-js';
 
@@ -19,33 +21,31 @@ const NO_DEPOSIT = '0';
 export class Wallet {
   walletSelector;
   wallet;
-  accountId;
-  contractId;
+  network;
+  createAccessKeyFor;
 
-  constructor({contractId, createAccessKey=true}){
-    // Initializing a wallet with a contractId will add a
-    // key to the user's account.
+  constructor({ createAccessKeyFor = undefined, network = 'testnet' }) {
+    // Login to a wallet passing a contractId will create a local
+    // key, so the user skips signing non-payable transactions.
     // Omitting the accountId will result in the user being
     // asked to sign all transactions.
-    this.contractWalletInit = createAccessKey ? contractId : undefined;
-    this.contractId = contractId;
+    this.createAccessKeyFor = createAccessKeyFor
+    this.network = 'testnet'
   }
 
   // To be called when the website loads
   async startUp() {
     this.walletSelector = await setupWalletSelector({
-      network: 'testnet',
+      network: this.network,
       modules: [setupMyNearWallet({ iconUrl: MyNearIconUrl }),
-        setupLedger({ iconUrl: LedgerIconUrl })],
+      setupLedger({ iconUrl: LedgerIconUrl })],
     });
 
     const isSignedIn = this.walletSelector.isSignedIn();
 
     if (isSignedIn) {
-      const { accounts } = this.walletSelector.store.getState();
-
       this.wallet = await this.walletSelector.wallet();
-      this.accountId = accounts[0].accountId;
+      this.accountId = this.walletSelector.store.getState().accounts[0].accountId;
     }
 
     return isSignedIn;
@@ -54,19 +54,19 @@ export class Wallet {
   // Sign-in method
   signIn() {
     const description = 'Please select a wallet to sign in.';
-    const modal = setupModal(this.walletSelector, { contractId: this.contractWalletInit, description });
+    const modal = setupModal(this.walletSelector, { contractId: this.createAccessKeyFor, description });
     modal.show();
   }
 
   // Sign-out method
   signOut() {
     this.wallet.signOut();
-    this.wallet = this.accountId = this.contractId = null;
+    this.wallet = this.accountId = this.createAccessKeyFor = null;
     window.location.replace(window.location.origin + window.location.pathname);
   }
 
   // Make a read-only call to retrieve information from the network
-  async viewMethod({ contractId = this.contractId, method, args = {} }) {
+  async viewMethod({ contractId, method, args = {} }) {
     const { network } = this.walletSelector.options;
     const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
 
@@ -81,12 +81,10 @@ export class Wallet {
   }
 
   // Call a method that changes the contract's state
-  async callMethod({ contractId = this.contractId, method, args = {}, gas = THIRTY_TGAS, deposit = NO_DEPOSIT }) {
-    const { accountId } = this.walletSelector.store.getState().accounts[0];
-
+  async callMethod({ contractId, method, args = {}, gas = THIRTY_TGAS, deposit = NO_DEPOSIT }) {
     // Sign a transaction with the "FunctionCall" action
     return await this.wallet.signAndSendTransaction({
-      signerId: accountId,
+      signerId: this.accountId,
       receiverId: contractId,
       actions: [
         {

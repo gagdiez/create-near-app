@@ -4,11 +4,11 @@ import Form from './components/Form';
 import SignIn from './components/SignIn';
 import Messages from './components/Messages';
 
-const App = ({ isSignedIn, contract, wallet }) => {
+const App = ({ isSignedIn, guestBook, wallet }) => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    contract.getMessages().then(setMessages);
+    guestBook.getMessages().then(setMessages);
   }, []);
 
   onSubmit = async (e) => {
@@ -18,8 +18,8 @@ const App = ({ isSignedIn, contract, wallet }) => {
 
     fieldset.disabled = true;
 
-    await contract.addMessage(message.value, donation.value)
-    const messages = await contract.getMessages()
+    await guestBook.addMessage(message.value, donation.value)
+    const messages = await guestBook.getMessages()
 
     setMessages(messages);
     message.value = '';
