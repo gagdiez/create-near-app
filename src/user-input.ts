@@ -67,6 +67,7 @@ const exampleChoices: Choices<Example> = [
   {title: 'Guest Book', value: 'guest_book'},
   {title: 'Donation', value: 'donation'},
   {title: 'Cross-Contract Call', value: 'xcc'},
+  {title: 'Coin Flip', value: 'coin_flip'},
 ];
 const contractChoices: Choices<Contract> = [
   {title: 'TypeScript', value: 'js'},
