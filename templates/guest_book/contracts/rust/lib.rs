@@ -4,7 +4,7 @@ use near_sdk::{env, AccountId, Balance, near_bindgen};
 use near_sdk::collections::{Vector};
 use near_sdk::json_types::{U128};
 
-const POINT_ONE: Balance = 10000000000000000000000;
+const POINT_ONE: Balance = 100_000_000_000_000_000_000_000;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]

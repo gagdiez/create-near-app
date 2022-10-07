@@ -1,4 +1,4 @@
-export const POINT_ONE = '10000000000000000000000';
+export const POINT_ONE = '100000000000000000000000';
 
 export class PostedMessage {
   premium: boolean;
