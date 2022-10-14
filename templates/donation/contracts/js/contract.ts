@@ -12,7 +12,7 @@ class DonationContract {
     this.beneficiary = beneficiary
   }
 
-  @call({privateFunction: true})
+  @call({payableFunction: true})
   donate() {
     // Get who is calling the method and how much $NEAR they attached
     let donor = near.predecessorAccountId(); 
