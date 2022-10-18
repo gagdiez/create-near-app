@@ -5,7 +5,7 @@ export class PostedMessage {
   sender: string;
   text: string;
 
-  constructor({ premium, sender, text }: { premium: boolean, sender: string, text: string }) {
+  constructor({ premium, sender, text }: PostedMessage) {
     this.premium = premium;
     this.sender = sender;
     this.text = text;
