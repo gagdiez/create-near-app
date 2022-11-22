@@ -10,8 +10,10 @@ export class GuestBook {
   }
 
   async getMessages() {
-    const messages = await this.wallet.viewMethod({ contractId: this.contractId, method: "get_messages" })
-    console.log(messages)
+    // Check how many messages there are and ask for the last 10
+    const total_messages = this.wallet.viewMethod({ contractId: this.contractId, method: "last_messages" })
+    const from = total_messages > 10 ? total_messages - 10 : 0;
+    const messages = await this.wallet.viewMethod({ contractId: this.contractId, method: "get_messages", from })
     return messages
   }
 

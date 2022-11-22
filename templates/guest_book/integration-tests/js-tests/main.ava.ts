@@ -50,10 +50,15 @@ test("send two messages and expect two total", async (t) => {
   const { root, contract, alice } = t.context.accounts;
   await root.call(contract, "add_message", { text: "aloha" });
   await alice.call(contract, "add_message", { text: "hola" }, { attachedDeposit: NEAR.parse('1') });
+  
+  const total_messages = await contract.view("total_messages");
+  t.is(total_messages, 2);
+
   const msgs = await contract.view("get_messages");
   const expected = [
     { premium: false, sender: root.accountId, text: "aloha" },
     { premium: true, sender: alice.accountId, text: "hola" },
   ];
+
   t.deepEqual(msgs, expected);
 });

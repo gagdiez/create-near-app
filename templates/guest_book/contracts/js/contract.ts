@@ -21,4 +21,7 @@ class GuestBook {
   get_messages({ from_index = 0, limit = 10 }: { from_index: number, limit: number }): PostedMessage[] {
     return this.messages.toArray().slice(from_index, from_index + limit);
   }
+
+  @view({})
+  total_messages(): number { return this.messages.length }
 }

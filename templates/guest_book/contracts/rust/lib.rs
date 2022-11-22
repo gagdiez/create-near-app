@@ -17,7 +17,7 @@ pub struct PostedMessage {
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
-pub struct GuestBook {
+struct GuestBook {
   messages: Vector<PostedMessage>,
 }
 
@@ -50,12 +50,13 @@ impl GuestBook {
     .take(limit.unwrap_or(10) as usize)
     .collect()
   }
+
+  pub fn total_messages(&self) -> u64 { self.messages.len() }
 }
 
 /*
  * the rest of this file sets up unit tests
  * to run these, the command will be: `cargo test`
- * Note: 'rust-counter-tutorial' comes from cargo.toml's 'name' key
  */
 
 // use the attribute below for unit tests
@@ -80,8 +81,8 @@ mod tests {
     contract.add_message("2nd message".to_string());
     contract.add_message("3rd message".to_string());
     
-    let messages = &contract.get_messages(None, None);
-    assert!(messages.len() == 3);
+    let total = &contract.total_messages();
+    assert!(*total == 3);
 
     let last_message = &contract.get_messages(Some(U128::from(1)), Some(2))[1];
     assert_eq!(last_message.premium, false);

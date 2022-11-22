@@ -49,7 +49,11 @@ const App = ({ isSignedIn, guestBook, wallet }) => {
         ? <Form onSubmit={onSubmit} currentAccountId={wallet.accountId} />
         : <SignIn/>
       }
-      { !!isSignedIn && !!messages.length && <Messages messages={messages}/> }
+
+      <hr />
+
+      { !!messages.length && <Messages messages={messages}/> }
+
     </main>
   );
 };
